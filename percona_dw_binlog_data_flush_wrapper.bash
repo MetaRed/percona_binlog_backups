@@ -1,7 +1,12 @@
 #!/bin/bash
-# 
+#
 # backs up the db binlog, copies backups to local backup dir
 # -RL
+
+# email function
+notify_email(){
+  mail -s "${0}: failed on ${SERVER_NAME}" $EMAIL
+}
 
 EMAIL=bigkahuna@meta.red
 SERVER_NAME=$(hostname --fqdn)
@@ -10,7 +15,7 @@ SERVER_NAME=$(hostname --fqdn)
 # exit if this fails since we need backups.
 /path/to/script/dir/flush_binlogs.bash
 if [ ! $? -eq 0 ]; then
-  echo "${0} exited with nonzero status" |mail -s "${0}: failed on $SERVER_NAME" $EMAIL
+  echo "${0} exited with nonzero status" | notify_email
   exit 1
 fi
 
@@ -18,6 +23,6 @@ fi
 # exit if this fails, since we need backups...
 /path/to/script/dir/percona_dw_binlog_backup_data_dir.bash
 if [ ! $? -eq 0 ]; then
-  echo "${0} exited with nonzero status" |mail -s "${0}: failed on $SERVER_NAME" $EMAIL
+  echo "${0} exited with nonzero status" | notify_email
   exit 1
 fi
